@@ -1,0 +1,27 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ deployment.name }}
+  namespace: {{ namespace }}
+  labels:
+    app: {{ deployment.app }}
+spec:
+  replicas: {{ deployment.replicas }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: {{ deployment.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ deployment.app }}
+    spec:
+      containers: {{ deployment.containers }}
+{% if deployment.volumes is defined %}
+      volumes: {{ deployment.volumes }}
+{% endif %}

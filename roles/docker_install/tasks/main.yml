@@ -1,0 +1,42 @@
+---
+- name: Add Docker Apt Key
+  apt_key:
+    url: https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg
+    state: present
+  become: yes
+
+- name: Enable Docker Apt Repo
+  apt_repository:
+    repo: "{{ default_repo }}"
+    state: present
+    update_cache: yes
+  become: yes
+
+# Install set version of Docker CE so that it can be controlled
+- name: Install Docker CE
+  apt:
+    name: "docker-ce={{ docker_version }}"
+    state: present
+  register: pkg_install
+  become: yes
+
+- name: Create docker group (for container mgmt)
+  group:
+    name: docker
+    state: present
+  become: yes
+
+- name: Add Ansible user to Docker group
+  user:
+    name: ansible
+    groups: docker
+    append: yes
+  become: yes
+
+- name: Ensure service is started
+  service:
+    name: docker
+    enabled: yes
+    state: started
+  become: yes
+  notify: Test docker

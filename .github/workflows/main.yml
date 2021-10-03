@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+          architecture: "x64"
+
+      - name: Install Ansible lint
+        run: pip install ansible-core ansible-lint
+
+      - name: Install test requirements
+        run: ansible-galaxy install -r test-requirements.yml
+
+      - name: Run Ansible lint
+        run: export ANSIBLE_COLLECTIONS_PATH=/home/runner/.ansible/collections/ansible_collections && ansible-lint

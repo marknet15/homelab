@@ -1,0 +1,72 @@
+---
+- name: Apt Upgrade Hosts
+  hosts: all
+  serial: "{{ serial_hosts | default(4) }}"
+  max_fail_percentage: 25
+  tasks:
+    - name: "Send Slack notification"
+      community.general.slack:
+        token: "{{ slack_token }}"
+        msg: System update event
+        attachments:
+          - text: Initiating upgrade of all apt packages
+            color: warning
+            title: System packages upgrade
+      delegate_to: localhost
+      run_once: yes
+      when:
+        - slack_token is defined
+
+    - name: Update apt-cache
+      apt:
+        update_cache: yes
+      become: yes
+
+    - name: Run apt dist-upgrade
+      apt:
+        upgrade: dist
+        autoclean: yes
+      become: yes
+      register: output
+
+    - name: Show apt dist-upgrade results
+      debug:
+        msg: "{{ output.stdout_lines }}"
+
+    - name: Reboot host
+      reboot:
+        msg: "Rebooting host to complete updates"
+      become: yes
+      when:
+        - reboot_enabled | default(false) | bool
+
+    - name: "Wait for host to boot up"
+      wait_for:
+        host: "{{ ansible_host }}"
+        search_regex: OpenSSH
+        port: 22
+        delay: 1
+        timeout: 300
+      connection: local
+      when:
+        - reboot_enabled | default(false) | bool
+
+    - name: Check host uptime
+      command: uptime
+      changed_when: false
+      register: output
+
+    - name: Show host uptime
+      debug:
+        msg: "{{ output.stdout_lines }}"
+
+    # Clean old packages from hosts
+    - name: Remove un-used packages
+      apt:
+        autoremove: yes
+      become: yes
+      register: output
+
+    - name: Show package cleaning results
+      debug:
+        msg: "{{ output.stdout_lines }}"

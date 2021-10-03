@@ -1,0 +1,41 @@
+---
+- name: "Create kubernetes namespace"
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'namespace.yaml.j2') | from_yaml }}"
+    validate:
+      fail_on_error: yes
+    state: present
+
+- name: "Template out values.yaml files"
+  template:
+    src: "values.yaml.j2"
+    dest: "/tmp/{{ chart.name }}.yaml"
+    mode: 0660
+
+- name: "Add helm repository"
+  kubernetes.core.helm_repository:
+    name: stable
+    repo_url: "{{ chart.repository }}"
+  when:
+    - chart.helm_repository is defined
+
+- name: "Deploy helm chart to the cluster"
+  kubernetes.core.helm:
+    name: "{{ chart.name }}"
+    chart_ref: "{{ chart.source.path }}"
+    release_namespace: "{{ namespace }}"
+    update_repo_cache: yes
+    values_files:
+      - "/tmp/{{ chart.name }}.yaml"
+
+- name: "Register a DNS record with CloudFlare"
+  community.general.cloudflare_dns:
+    zone: "{{ chart.dnsZone }}"
+    type: CNAME
+    record: "{{ chart.dnsRecord }}"
+    value: "{{ chart.dnsValue }}"
+    account_email: "{{ cloudflare_username }}"
+    account_api_token: "{{ cloudflare_api_token }}"
+    state: present
+  when:
+    - dns_enabled | default(false) | bool

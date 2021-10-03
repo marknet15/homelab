@@ -1,0 +1,24 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ service.name }}
+  namespace: {{ namespace }}
+{% if service.annotations is defined %}
+  annotations: {{ service.annotations }}
+{% endif %}
+
+spec:
+  selector:
+    app: {{ service.app }}
+  type: {{ service.type }}
+{% if service.externalTrafficPolicy is defined %}
+  externalTrafficPolicy: {{ service.externalTrafficPolicy }}
+{% endif %}
+{% if service.externalIPs is defined %}
+  externalIPs: {{ service.externalIPs }}
+{% endif %}
+{% if service.loadBalancerIP is defined %}
+  loadBalancerIP: {{ service.loadBalancerIP }}
+{% endif %}
+  ports: {{ service.ports }}

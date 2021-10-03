@@ -1,0 +1,20 @@
+namespace: marknet15
+name: homelab
+version: 1.0.0
+readme: README.md
+authors:
+  - Mark Woolley <mw@marknet15.com>
+description: Assorted roles aimed at the provisioning of a homelab
+license:
+  - GPL-2.0-or-later
+license_file: ""
+tags:
+  - homelab
+dependencies:
+  community.general: ">=4.0.0"
+  kubernetes.core: ">=2.2.0"
+repository: https://github.com/marknet15/homelab
+#documentation: http://docs.example.com
+#homepage: http://example.com
+issues: https://github.com/marknet15/homelab/issues
+build_ignore: []

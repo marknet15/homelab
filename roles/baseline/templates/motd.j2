@@ -1,0 +1,21 @@
+############################################################################
+#                     Welcome to {{ motd_org }}                            #
+#             All connections are monitored and recorded                   #
+#        Disconnect IMMEDIATELY if you are not an authorized user!         #
+############################################################################
+
+This system is managed by Ansible.
+
+OS           : {{ ansible_distribution }} {{ ansible_distribution_version }}
+Kernel       : {{ ansible_kernel }}
+System type  : {{ ansible_system }}
+Virt type    : {{ ansible_virtualization_type }}
+Hostname     : {{ ansible_hostname }}
+Name servers :
+{% for ns in ansible_dns.nameservers %}
+  - {{ ns }}
+{% endfor %}
+IP addresses :
+{% for ip in ansible_all_ipv4_addresses %}
+  - {{ ip }}
+{% endfor %}

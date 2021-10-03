@@ -1,0 +1,28 @@
+---
+- name: "Check if i2c support is enabled"
+  ansible.builtin.command: "raspi-config nonint get_i2c"
+  changed_when: false
+  become: yes
+  register: i2c_check
+
+- name: "Enable i2c support"
+  ansible.builtin.command: "raspi-config nonint do_i2c 0"
+  become: yes
+  when: i2c_check.stdout == "1"
+
+- name: "Reboot after enabling i2c support"
+  ansible.builtin.reboot:
+    msg: "Rebooting to apply i2c settings"
+  become: yes
+  when: i2c_check.stdout == "1"
+
+- name: "Install required i2c package"
+  ansible.builtin.apt:
+    name: i2c-tools
+  become: yes
+
+- name: "Install i2c_lcd pip package"
+  ansible.builtin.pip:
+    name: i2c_lcd
+    state: present
+  become: yes
