@@ -1,0 +1,4 @@
+---
+{% if chart.overrides | default(False) %}
+{{ chart.overrides | to_yaml }}
+{% endif %}

@@ -1,0 +1,55 @@
+---
+- name: "Create kubernetes namespace"
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'namespace.yaml.j2') | from_yaml }}"
+    validate:
+      fail_on_error: yes
+    state: present
+
+- name: "Create kubernetes deployment"
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'deployment.yaml.j2') | from_yaml }}"
+    validate:
+      fail_on_error: yes
+    state: present
+  with_items: "{{ deployments }}"
+  loop_control:
+    loop_var: deployment
+
+- name: "Create kubernetes service"
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'service.yaml.j2') | from_yaml }}"
+    validate:
+      fail_on_error: yes
+    state: present
+  with_items: "{{ services }}"
+  loop_control:
+    loop_var: service
+
+- name: "Create kubernetes ingress"
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'ingress.yaml.j2') | from_yaml }}"
+    validate:
+      fail_on_error: yes
+    state: present
+  with_items: "{{ ingress_configs }}"
+  loop_control:
+    loop_var: ingress
+  when:
+    - ingress_configs is defined
+
+- name: "Register a DNS record with CloudFlare"
+  community.general.cloudflare_dns:
+    zone: "{{ ingress.dnsZone }}"
+    type: CNAME
+    record: "{{ ingress.dnsRecord }}"
+    value: "{{ ingress.dnsValue }}"
+    account_email: "{{ cloudflare_username }}"
+    account_api_token: "{{ cloudflare_api_token }}"
+    state: present
+  with_items: "{{ ingress_configs }}"
+  loop_control:
+    loop_var: ingress
+  when:
+    - ingress_configs is defined
+    - ingress.dnsEnabled | default(false) | bool

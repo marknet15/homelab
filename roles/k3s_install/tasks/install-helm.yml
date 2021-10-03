@@ -1,0 +1,25 @@
+---
+- name: "Download helm tar gz"
+  get_url:
+    url: "https://get.helm.sh/helm-{{ helm_version }}-linux-arm.tar.gz"
+    dest: /tmp/helm-linux-arm.tar.gz
+
+- name: "Extract helm tar gz"
+  unarchive:
+    src: /tmp/helm-linux-arm.tar.gz
+    dest: /tmp
+    remote_src: yes
+
+- name: "Copy helm binary to /usr/local/bin"
+  copy:
+    src: /tmp/linux-arm/helm
+    dest: /usr/local/bin
+    mode: +x
+    remote_src: yes
+  become: yes
+
+- name: "Add stable helm chart repo"
+  command: >
+    helm repo add stable
+    https://kubernetes-charts.storage.googleapis.com
+  become: yes

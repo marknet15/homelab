@@ -1,0 +1,48 @@
+---
+- name: "Download k3s install script"
+  get_url:
+    url: https://get.k3s.io
+    dest: /tmp/k3s.sh
+
+- name: "Make k3s.sh executable"
+  file:
+    path: "/tmp/k3s.sh"
+    mode: "+x"
+
+- name: "Run k3s install script (master node)"
+  shell: "./k3s.sh"
+  become: yes
+  changed_when: false
+  args:
+    chdir: /tmp
+  environment:
+    INSTALL_K3S_VERSION: "{{ k3s_version }}"
+
+- name: "Setup kube config"
+  block:
+    # Setup kube config for user
+    - name: "Create .kube directory"
+      file:
+        path: "~/.kube"
+        state: directory
+
+    - name: "Copy k3s kube config to ~/.kube"
+      copy:
+        src: "/etc/rancher/k3s/k3s.yaml"
+        dest: "/home/{{ ansible_user }}/.kube/config"
+        remote_src: yes
+        owner: "{{ ansible_user }}"
+      become: yes
+
+    # Acquire node join token
+    - name: "Read k3s node join token from master"
+      slurp:
+        src: "/var/lib/rancher/k3s/server/node-token"
+      become: yes
+      register: node_token_lookup
+
+    - name: "Temporarily save node join token to local file"
+      copy:
+        content: "{{ node_token_lookup.content | b64decode }}"
+        dest: "/tmp/node-token"
+      delegate_to: localhost

@@ -1,0 +1,42 @@
+---
+- hosts: all
+  gather_facts: no
+  pre_tasks:
+    - name: "Clone tp-link smartplug cli"
+      git:
+        repo: https://github.com/softScheck/tplink-smartplug.git
+        dest: /tmp/tplink-smartplug
+      delegate_to: localhost
+      run_once: yes
+      when:
+        - kasa_plug_enabled | default(True) | bool
+  tasks:
+    - name: "Send Slack notification"
+      slack:
+        token: "{{ slack_token }}"
+        msg: K3s cluster system event
+        attachments:
+          - text: Initiating power on of k3s cluster nodes
+            color: good
+            title: Start up event
+      delegate_to: localhost
+      run_once: yes
+
+    - name: "Power on kasa smartplug"
+      script:
+        cmd: >
+          /tmp/tplink-smartplug/tplink_smartplug.py
+          -t {{ kasa_smartplug_ip }} -c on
+      delegate_to: localhost
+      run_once: yes
+      when:
+        - kasa_plug_enabled | default(True) | bool
+
+    - name: "Wait for host to boot up"
+      wait_for:
+        host: "{{ ansible_host }}"
+        search_regex: OpenSSH
+        port: 22
+        delay: 1
+        timeout: 300
+      connection: local

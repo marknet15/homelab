@@ -1,0 +1,32 @@
+### Managed by Ansible ###
+{% for service in services %}
+{% if service.vipName is defined %}
+vrrp_instance {{ service.vipName }} {
+    state MASTER
+    interface {{ service.vipInterface | default("eth0") }}
+    virtual_router_id {{ service.vipRouterId }}
+    priority 100
+    advert_int 1
+
+    authentication {
+        auth_type PASS
+        auth_pass {{ service.vipSecretPass }}
+    }
+
+    virtual_ipaddress {
+{% for vip in service.vipAddresses %}
+        {{ vip }}
+{% endfor %}
+    }
+
+{% for port in service.ports %}
+    real_server 127.0.0.1 {{ port.targetPort }} {
+        TCP_CHECK {
+            connect_port {{ port.targetPort }}
+            connect_timeout 2
+        }
+    }
+{% endfor %}
+}
+{% endif %}
+{% endfor %}

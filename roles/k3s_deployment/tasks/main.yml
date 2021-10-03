@@ -1,0 +1,14 @@
+---
+- name: "Deploy manifests to kubernetes cluster"
+  include_tasks: manifest.yml
+  when:
+    - deployments is defined
+    - services is defined
+
+- name: "Deploy helm chart to kubernetes cluster"
+  include_tasks: helm.yml
+  with_items: "{{ charts }}"
+  loop_control:
+    loop_var: chart
+  when:
+    - charts is defined

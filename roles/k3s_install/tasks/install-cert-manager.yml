@@ -1,0 +1,23 @@
+---
+- name: "Download cert-manager kube yaml"
+  get_url:
+    url: "https://github.com/jetstack/cert-manager/releases/download/{{ cert_manager_version }}/cert-manager.yaml"
+    dest: /tmp/cert-manager.yaml
+
+- name: "Apply cert-manager kube yaml to the cluster"
+  k8s:
+    state: present
+    src: /tmp/cert-manager.yaml
+
+- name: "Create cloudflare api token secret"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'cloudflare.yaml.j2') }}"
+
+- name: "Create cert-manager issuer"
+  k8s:
+    state: present
+    definition: "{{ lookup('template', 'issuer.yaml.j2') }}"
+  with_items: "{{ acme_issuers }}"
+  loop_control:
+    loop_var: acme_issuer

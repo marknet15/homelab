@@ -1,0 +1,45 @@
+---
+- name: "Check k3s cluster isn't already installed"
+  command: kubectl cluster-info
+  become: yes
+  ignore_errors: yes
+  register: k3s_check
+  when:
+    - master_node | default(false) | bool
+
+- name: "Setup master k3s node"
+  include_tasks: master-node.yml
+  when:
+    - master_node | default(false) | bool
+    - k3s_check.rc != 0
+
+- name: "Setup worker k3s node"
+  include_tasks: worker-node.yml
+  when:
+    - not master_node | default(false) | bool
+    - k3s_check.rc != 0
+
+- name: "Remove temp token file"
+  file:
+    path: "/tmp/node-token"
+    state: absent
+  delegate_to: localhost
+  run_once: yes
+  when:
+    - not master_node | default(false) | bool
+
+- name: "Install cert-manager into the cluster"
+  include_tasks: install-cert-manager.yml
+  when:
+    - master_node | default(false) | bool
+
+- name: "Install metallb into the cluster"
+  include_tasks: install-metallb.yml
+  when:
+    - master_node | default(false) | bool
+    - install_metallb | default(false) | bool
+
+- name: "Install helm"
+  include_tasks: install-helm.yml
+  when:
+    - master_node | default(false) | bool

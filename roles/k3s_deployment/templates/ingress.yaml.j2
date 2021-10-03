@@ -1,0 +1,17 @@
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: {{ ingress.name }}
+  namespace: {{ namespace }}
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+    traefik.ingress.kubernetes.io/redirect-entry-point: https
+{% if ingress.issuerName is defined %}
+    cert-manager.io/cluster-issuer: {{ ingress.issuerName }}
+{% endif %}
+spec:
+  rules: {{ ingress.rules }}
+{% if ingress.issuerName is defined %}
+  tls: {{ ingress.tls }}
+{% endif %}
