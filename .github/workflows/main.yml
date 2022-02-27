@@ -28,4 +28,4 @@ jobs:
         run: ansible-galaxy install -r test-requirements.yml
 
       - name: Run Ansible lint
-        run: ansible-lint
+        run: export ANSIBLE_COLLECTIONS_PATH=/home/runner/.ansible/collections/ansible_collections && ansible-lint
