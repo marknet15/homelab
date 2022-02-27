@@ -53,6 +53,7 @@
 
     - name: Check host uptime
       command: uptime
+      changed_when: false
       register: output
 
     - name: Show host uptime

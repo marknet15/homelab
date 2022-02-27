@@ -19,7 +19,7 @@
   become: yes
 
 - name: "Add stable helm chart repo"
-  command: >
-    helm repo add stable
-    https://kubernetes-charts.storage.googleapis.com
+  kubernetes.core.helm_repository:
+    name: stable
+    repo_url: "https://kubernetes-charts.storage.googleapis.com"
   become: yes
