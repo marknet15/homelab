@@ -21,8 +21,11 @@ jobs:
           python-version: "3.9"
           architecture: "x64"
 
-      - name: Install test requirements
+      - name: Install Ansible lint
         run: pip install ansible-core ansible-lint
+
+      - name: Install test requirements
+        run: ansible-galaxy install -r test-requirements.yml
 
       - name: Run Ansible lint
         run: ansible-lint
