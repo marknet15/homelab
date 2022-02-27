@@ -22,7 +22,7 @@ jobs:
           architecture: "x64"
 
       - name: Install test requirements
-        run: pip install test-requirements.txt
+        run: pip install -r test-requirements.txt
 
       - name: Run Ansible lint
         run: ansible-lint
