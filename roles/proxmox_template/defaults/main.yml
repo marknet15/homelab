@@ -1,0 +1,4 @@
+---
+default_template:
+  name: focal-server-cloudimg-amd64.img
+  url: https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64.img

@@ -1,0 +1,84 @@
+---
+- name: Assert required config is present
+  ansible.builtin.assert:
+    that:
+      - pve_host is defined
+      - pve_user is defined
+      - pve_node is defined
+      - pve_storage is defined
+      - vm_template is defined
+      - vm_template.name is defined
+      - vm_template.storage is defined
+      - vm_template.ip_config is defined
+      - vm_template.cloud_init_user is defined
+      - vm_template.cloud_init_password is defined
+    fail_msg: "Role is missing required configuration"
+    success_msg: "Role has all required configuration"
+
+- name: Install required python package
+  pip:
+    name: proxmoxer
+    state: present
+
+- name: Download cloud server image
+  ansible.builtin.get_url:
+    url: "{{ vm_template.image_url | default(default_template.url) }}"
+    dest: "{{ vm_template.image_dest_path | default('/home/' + ansible_user + '/' + default_template.name) }}"
+
+- name: Create initial VM
+  community.general.proxmox_kvm:
+    node: "{{ pve_node }}"
+    api_user: "{{ pve_user }}"
+    api_password: "{{ pve_password | default(omit) }}"
+    api_host: "{{ pve_host }}"
+    name: "{{ vm_template.name }}"
+    scsihw: virtio-scsi-pci
+    scsi:
+      scsi0: "{{ vm_template.storage }}"
+    ide:
+      ide2: "local:cloudinit,format=qcow2"
+    bootdisk: scsi0
+    ciuser: "{{ vm_template.cloud_init_user }}"
+    cipassword: "{{ vm_template.cloud_init_password }}"
+    net:
+      net0: "virtio,bridge=vmbr0"
+    ipconfig:
+      ipconfig0: "{{ vm_template.ip_config }}"
+    proxmox_default_behavior: compatibility
+  register: vm_result
+
+- name: Import the cloud init disk
+  ansible.builtin.command:
+    cmd: >
+      qm importdisk {{ vm_result.vmid }}
+      {{ vm_template.image_dest_path | default('/home/' + ansible_user + '/' + default_template.name) }}
+      {{ pve_storage }}
+    creates: "/dev/mapper/pve-vm--{{ vm_result.vmid }}--disk--1"
+  become: yes
+  when:
+    - vm_result is defined
+
+- name: Attach imported cloud init disk
+  ansible.builtin.lineinfile:
+    path: "/etc/pve/local/qemu-server/{{ vm_result.vmid }}.conf"
+    regexp: "^scsi0:.*"
+    line: "scsi0: {{ pve_storage }}:{{ vm_result.vmid }}/vm-{{ vm_result.vmid }}-disk-1.raw"
+  become: yes
+
+- name: Covert initial VM to template
+  community.general.proxmox_kvm:
+    node: "{{ pve_node }}"
+    api_user: "{{ pve_user }}"
+    api_password: "{{ pve_password | default(omit) }}"
+    api_host: "{{ pve_host }}"
+    vmid: "{{ vm_result.vmid }}"
+    name: "{{ vm_template.name }}"
+    scsihw: virtio-scsi-pci
+    ide:
+      ide2: "local:cloudinit,format=qcow2"
+    bootdisk: scsi0
+    ciuser: "{{ vm_template.cloud_init_user }}"
+    cipassword: "{{ vm_template.cloud_init_password }}"
+    proxmox_default_behavior: compatibility
+    template: yes
+    update: yes

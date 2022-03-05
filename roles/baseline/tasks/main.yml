@@ -21,7 +21,7 @@
   when:
     - motd_org is defined
 
-- name: "Install system packages"
+- name: "Install default packages"
   package:
     name:
       - python3
