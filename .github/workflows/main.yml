@@ -22,7 +22,7 @@ jobs:
           architecture: "x64"
 
       - name: Install Ansible lint
-        run: pip install ansible-core ansible-lint
+        run: pip install ansible-core==2.12.3 ansible-lint==5.4.0
 
       - name: Install test requirements
         run: ansible-galaxy install -r test-requirements.yml

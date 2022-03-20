@@ -1,23 +1,30 @@
 ---
-- name: "Check k3s cluster isn't already installed"
+- name: "Check k3s cluster info"
   command: kubectl cluster-info
   become: yes
   ignore_errors: yes
   register: k3s_check
   when:
-    - master_node | default(false) | bool
+    - k3s_main_node | default(false) | bool
 
-- name: "Setup master k3s node"
-  include_tasks: master-node.yml
+- name: "Set check fact"
+  set_fact:
+    k3s_installed: yes
   when:
-    - master_node | default(false) | bool
-    - k3s_check.rc != 0
+    - k3s_main_node | default(false) | bool
+    - k3s_check.rc == 0
+
+- name: "Setup main k3s node"
+  include_tasks: main-node.yml
+  when:
+    - k3s_main_node | default(false) | bool
+    - not k3s_installed
 
 - name: "Setup worker k3s node"
   include_tasks: worker-node.yml
   when:
-    - not master_node | default(false) | bool
-    - k3s_check.rc != 0
+    - not k3s_main_node | default(false) | bool
+    # - not k3s_installed
 
 - name: "Remove temp token file"
   file:
@@ -26,20 +33,22 @@
   delegate_to: localhost
   run_once: yes
   when:
-    - not master_node | default(false) | bool
-
-- name: "Install cert-manager into the cluster"
-  include_tasks: install-cert-manager.yml
-  when:
-    - master_node | default(false) | bool
-
-- name: "Install metallb into the cluster"
-  include_tasks: install-metallb.yml
-  when:
-    - master_node | default(false) | bool
-    - install_metallb | default(false) | bool
+    - not k3s_main_node | default(false) | bool
 
 - name: "Install helm"
   include_tasks: install-helm.yml
   when:
-    - master_node | default(false) | bool
+    - k3s_main_node | default(false) | bool
+    - install_helm | default(true) | bool
+
+- name: "Install cert-manager into the cluster"
+  include_tasks: install-cert-manager.yml
+  when:
+    - k3s_main_node | default(false) | bool
+    - install_certmgmr | default(true) | bool
+
+- name: "Install metallb into the cluster"
+  include_tasks: install-metallb.yml
+  when:
+    - k3s_main_node | default(false) | bool
+    - install_metallb | default(false) | bool
