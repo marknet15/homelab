@@ -22,13 +22,17 @@
     - motd_org is defined
 
 - name: "Install default packages"
-  package:
+  apt:
     name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
       - python3
       - python3-pip
       - htop
       - ncdu
       - vim
       - zip
+    update_cache: yes
     state: present
   become: yes

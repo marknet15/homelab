@@ -1,4 +1,6 @@
 ---
-cert_manager_version: v0.14.3
-helm_version: v3.2.1
+os_arch: arm
+cert_manager_version: v1.7
+helm_version: v3.8.1
 metallb_version: v0.9.3
+k3s_installed: no

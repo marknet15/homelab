@@ -9,21 +9,16 @@
   get_url:
     url: https://get.k3s.io
     dest: /tmp/k3s.sh
-
-- name: "Make k3s.sh executable"
-  file:
-    path: "/tmp/k3s.sh"
     mode: "+x"
 
 - name: "Run k3s install script (worker node)"
-  shell: "./k3s.sh"
+  command:
+    cmd: "/tmp/k3s.sh"
+    creates: "/tmp/{{ ansible_host }}"
   become: yes
-  changed_when: false
-  args:
-    chdir: /tmp
   environment:
     INSTALL_K3S_VERSION: "{{ k3s_version }}"
-    K3S_URL: "{{ k3s_master_endpoint }}"
+    K3S_URL: "{{ k3s_main_endpoint }}"
     K3S_TOKEN: "{{ node_token_lookup.content | b64decode }}"
 
 - name: "Save worker node install state"
@@ -31,4 +26,4 @@
     path: "/tmp/{{ ansible_host }}"
     mode: 0660
     state: touch
-  delegate_to: localhost
+  become: yes

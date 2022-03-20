@@ -27,16 +27,17 @@
 
 - name: Create initial VM
   community.general.proxmox_kvm:
+    name: "{{ vm_template.name }}"
     node: "{{ pve_node }}"
     api_user: "{{ pve_user }}"
     api_password: "{{ pve_password | default(omit) }}"
     api_host: "{{ pve_host }}"
-    name: "{{ vm_template.name }}"
+    onboot: yes
     scsihw: virtio-scsi-pci
     scsi:
       scsi0: "{{ vm_template.storage }}"
     ide:
-      ide2: "local:cloudinit,format=qcow2"
+      ide2: "{{ pve_storage }}:cloudinit,format=qcow2"
     bootdisk: scsi0
     ciuser: "{{ vm_template.cloud_init_user }}"
     cipassword: "{{ vm_template.cloud_init_password }}"
@@ -64,6 +65,8 @@
     regexp: "^scsi0:.*"
     line: "scsi0: {{ pve_storage }}:{{ vm_result.vmid }}/vm-{{ vm_result.vmid }}-disk-1.raw"
   become: yes
+  when:
+    - vm_result is defined
 
 - name: Covert initial VM to template
   community.general.proxmox_kvm:
@@ -75,10 +78,12 @@
     name: "{{ vm_template.name }}"
     scsihw: virtio-scsi-pci
     ide:
-      ide2: "local:cloudinit,format=qcow2"
+      ide2: "{{ pve_storage }}:cloudinit,format=qcow2"
     bootdisk: scsi0
     ciuser: "{{ vm_template.cloud_init_user }}"
     cipassword: "{{ vm_template.cloud_init_password }}"
     proxmox_default_behavior: compatibility
     template: yes
     update: yes
+  when:
+    - vm_result is defined
