@@ -3,14 +3,14 @@
   kubernetes.core.k8s:
     definition: "{{ lookup('template', 'namespace.yaml.j2') | from_yaml }}"
     validate:
-      fail_on_error: yes
+      fail_on_error: true
     state: present
 
 - name: "Create kubernetes deployment"
   kubernetes.core.k8s:
     definition: "{{ lookup('template', 'deployment.yaml.j2') | from_yaml }}"
     validate:
-      fail_on_error: yes
+      fail_on_error: true
     state: present
   with_items: "{{ deployments }}"
   loop_control:
@@ -20,7 +20,7 @@
   kubernetes.core.k8s:
     definition: "{{ lookup('template', 'service.yaml.j2') | from_yaml }}"
     validate:
-      fail_on_error: yes
+      fail_on_error: true
     state: present
   with_items: "{{ services }}"
   loop_control:
@@ -30,7 +30,7 @@
   kubernetes.core.k8s:
     definition: "{{ lookup('template', 'ingress.yaml.j2') | from_yaml }}"
     validate:
-      fail_on_error: yes
+      fail_on_error: true
     state: present
   with_items: "{{ ingress_configs }}"
   loop_control:

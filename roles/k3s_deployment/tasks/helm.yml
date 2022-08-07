@@ -3,11 +3,11 @@
   kubernetes.core.k8s:
     definition: "{{ lookup('template', 'namespace.yaml.j2') | from_yaml }}"
     validate:
-      fail_on_error: yes
+      fail_on_error: true
     state: present
 
 - name: "Template out values.yaml files"
-  template:
+  ansible.builtin.template:
     src: "values.yaml.j2"
     dest: "/tmp/{{ chart.name }}.yaml"
     mode: 0660
@@ -24,7 +24,7 @@
     name: "{{ chart.name }}"
     chart_ref: "{{ chart.source.path }}"
     release_namespace: "{{ namespace }}"
-    update_repo_cache: yes
+    update_repo_cache: true
     values_files:
       - "/tmp/{{ chart.name }}.yaml"
 

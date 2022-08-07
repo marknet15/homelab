@@ -1,6 +1,6 @@
 ---
 - name: "Download metallb install manifests"
-  get_url:
+  ansible.builtin.get_url:
     url: "https://raw.githubusercontent.com/metallb/metallb/{{ metallb_version }}/manifests/{{ file }}"
     dest: "/tmp/{{ file }}"
   with_items:
@@ -10,7 +10,7 @@
     loop_var: file
 
 - name: "Apply metallb install manifests"
-  k8s:
+  kubernetes.core.k8s:
     state: present
     src: "/tmp/{{ file }}"
   with_items:
@@ -20,6 +20,6 @@
     loop_var: file
 
 - name: "Create metallb config"
-  k8s:
+  kubernetes.core.k8s:
     state: present
     definition: "{{ lookup('template', 'metallb.yaml.j2') }}"
