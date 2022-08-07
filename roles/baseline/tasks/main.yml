@@ -1,28 +1,28 @@
 ---
 - name: "Set nameserver config"
-  template:
+  ansible.builtin.template:
     src: resolv.conf.j2
     dest: /etc/resolv.conf
     owner: root
     group: root
     mode: 0644
-  become: yes
+  become: true
   when:
     - name_servers is defined
 
 - name: "Set MOTD"
-  template:
+  ansible.builtin.template:
     src: motd.j2
     dest: /etc/motd
     owner: root
     group: root
     mode: 0644
-  become: yes
+  become: true
   when:
     - motd_org is defined
 
 - name: "Install default packages"
-  apt:
+  ansible.builtin.apt:
     name:
       - apt-transport-https
       - ca-certificates
@@ -33,6 +33,6 @@
       - ncdu
       - vim
       - zip
-    update_cache: yes
+    update_cache: true
     state: present
-  become: yes
+  become: true

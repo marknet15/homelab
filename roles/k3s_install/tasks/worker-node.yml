@@ -1,29 +1,29 @@
 ---
 - name: "Read k3s node join token"
-  slurp:
+  ansible.builtin.slurp:
     src: "/tmp/node-token"
   register: node_token_lookup
   delegate_to: localhost
 
 - name: "Download k3s install script"
-  get_url:
+  ansible.builtin.get_url:
     url: https://get.k3s.io
     dest: /tmp/k3s.sh
     mode: "+x"
 
 - name: "Run k3s install script (worker node)"
-  command:
+  ansible.builtin.command:
     cmd: "/tmp/k3s.sh"
     creates: "/tmp/{{ ansible_host }}"
-  become: yes
+  become: true
   environment:
     INSTALL_K3S_VERSION: "{{ k3s_version }}"
     K3S_URL: "{{ k3s_main_endpoint }}"
     K3S_TOKEN: "{{ node_token_lookup.content | b64decode }}"
 
 - name: "Save worker node install state"
-  file:
+  ansible.builtin.file:
     path: "/tmp/{{ ansible_host }}"
     mode: 0660
     state: touch
-  become: yes
+  become: true

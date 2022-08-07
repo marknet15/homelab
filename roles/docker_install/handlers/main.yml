@@ -3,26 +3,26 @@
   block:
     # Test docker works as expected locally
     - name: Create Test Container
-      docker_container:
+      community.docker.docker_container:
         name: hello-world
         image: hello-world
         container_default_behavior: no_defaults
         state: present
-      become: yes
+      become: true
 
     - name: Get container info
-      docker_container_info:
+      community.docker.docker_container_info:
         name: hello-world
-      become: yes
+      become: true
       register: status
 
     - name: Print Output of Test Container
-      debug:
+      ansible.builtin.debug:
         msg: "{{ status }}"
 
     - name: Remove Test Container
-      docker_container:
+      community.docker.docker_container:
         name: hello-world
         container_default_behavior: no_defaults
         state: absent
-      become: yes
+      become: true
