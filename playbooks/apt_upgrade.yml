@@ -18,23 +18,23 @@
         - slack_token is defined
 
     - name: Update apt-cache
-      apt:
+      ansible.builtin.apt:
         update_cache: yes
       become: yes
 
     - name: Run apt dist-upgrade
-      apt:
+      ansible.builtin.apt:
         upgrade: dist
         autoclean: yes
       become: yes
       register: output
 
     - name: Show apt dist-upgrade results
-      debug:
+      ansible.builtin.debug:
         msg: "{{ output.stdout_lines }}"
 
     - name: Reboot host
-      reboot:
+      ansible.builtin.reboot:
         msg: "Rebooting host to complete updates"
       become: yes
       when:
@@ -52,21 +52,21 @@
         - reboot_enabled | default(false) | bool
 
     - name: Check host uptime
-      command: uptime
+      ansible.builtin.command: uptime
       changed_when: false
       register: output
 
     - name: Show host uptime
-      debug:
+      ansible.builtin.debug:
         msg: "{{ output.stdout_lines }}"
 
     # Clean old packages from hosts
     - name: Remove un-used packages
-      apt:
+      ansible.builtin.apt:
         autoremove: yes
       become: yes
       register: output
 
     - name: Show package cleaning results
-      debug:
+      ansible.builtin.debug:
         msg: "{{ output.stdout_lines }}"
