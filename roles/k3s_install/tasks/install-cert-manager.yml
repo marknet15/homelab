@@ -3,6 +3,7 @@
   ansible.builtin.get_url:
     url: "https://github.com/jetstack/cert-manager/releases/download/{{ cert_manager_version }}/cert-manager.yaml"
     dest: /tmp/cert-manager.yaml
+    mode: "0755"
 
 - name: "Apply cert-manager kube yaml to the cluster"
   kubernetes.core.k8s:

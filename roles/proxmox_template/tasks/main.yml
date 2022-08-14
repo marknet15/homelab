@@ -16,7 +16,7 @@
     success_msg: "Role has all required configuration"
 
 - name: Install required python package
-  pip:
+  ansible.builtin.pip:
     name: proxmoxer
     state: present
 
@@ -24,6 +24,7 @@
   ansible.builtin.get_url:
     url: "{{ vm_template.image_url | default(default_template.url) }}"
     dest: "{{ vm_template.image_dest_path | default('/home/' + ansible_user + '/' + default_template.name) }}"
+    mode: "0755"
 
 - name: Create initial VM
   community.general.proxmox_kvm:
@@ -32,7 +33,7 @@
     api_user: "{{ pve_user }}"
     api_password: "{{ pve_password | default(omit) }}"
     api_host: "{{ pve_host }}"
-    onboot: yes
+    onboot: true
     scsihw: virtio-scsi-pci
     scsi:
       scsi0: "{{ vm_template.storage }}"
@@ -55,7 +56,7 @@
       {{ vm_template.image_dest_path | default('/home/' + ansible_user + '/' + default_template.name) }}
       {{ pve_storage }}
     creates: "/dev/mapper/pve-vm--{{ vm_result.vmid }}--disk--1"
-  become: yes
+  become: true
   when:
     - vm_result is defined
 
@@ -64,7 +65,7 @@
     path: "/etc/pve/local/qemu-server/{{ vm_result.vmid }}.conf"
     regexp: "^scsi0:.*"
     line: "scsi0: {{ pve_storage }}:{{ vm_result.vmid }}/vm-{{ vm_result.vmid }}-disk-1.raw"
-  become: yes
+  become: true
   when:
     - vm_result is defined
 
@@ -83,7 +84,7 @@
     ciuser: "{{ vm_template.cloud_init_user }}"
     cipassword: "{{ vm_template.cloud_init_password }}"
     proxmox_default_behavior: compatibility
-    template: yes
-    update: yes
+    template: true
+    update: true
   when:
     - vm_result is defined

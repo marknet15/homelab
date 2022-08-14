@@ -7,7 +7,7 @@ A simple role to create a Cloud Init VM template in Proxmox
 ```yaml
 ---
 - hosts: proxmox
-  gather_facts: yes
+  gather_facts: true
   roles:
     - marknet15.homelab.proxmox_template
   vars:
