@@ -17,7 +17,7 @@
   ansible.builtin.command:
     cmd: >
       gpg
-      --dearmor --yes
+      --dearmor --true
       -o /etc/apt/keyrings/docker.gpg
       /tmp/docker.gpg
   changed_when: false

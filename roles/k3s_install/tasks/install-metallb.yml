@@ -3,6 +3,7 @@
   ansible.builtin.get_url:
     url: "https://raw.githubusercontent.com/metallb/metallb/{{ metallb_version }}/manifests/{{ file }}"
     dest: "/tmp/{{ file }}"
+    mode: "0755"
   with_items:
     - namespace.yaml
     - metallb.yaml

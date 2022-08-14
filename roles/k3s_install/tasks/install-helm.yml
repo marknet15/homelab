@@ -3,6 +3,7 @@
   ansible.builtin.get_url:
     url: "https://get.helm.sh/helm-{{ helm_version }}-linux-{{ os_arch }}.tar.gz"
     dest: "/tmp/helm-linux-{{ os_arch }}.tar.gz"
+    mode: "0755"
 
 - name: "Extract helm tar gz"
   ansible.builtin.unarchive:

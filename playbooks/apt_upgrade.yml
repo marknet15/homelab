@@ -13,20 +13,20 @@
             color: warning
             title: System packages upgrade
       delegate_to: localhost
-      run_once: yes
+      run_once: true
       when:
         - slack_token is defined
 
     - name: Update apt-cache
       ansible.builtin.apt:
-        update_cache: yes
-      become: yes
+        update_cache: true
+      become: true
 
     - name: Run apt dist-upgrade
       ansible.builtin.apt:
         upgrade: dist
-        autoclean: yes
-      become: yes
+        autoclean: true
+      become: true
       register: output
 
     - name: Show apt dist-upgrade results
@@ -36,12 +36,12 @@
     - name: Reboot host
       ansible.builtin.reboot:
         msg: "Rebooting host to complete updates"
-      become: yes
+      become: true
       when:
         - reboot_enabled | default(false) | bool
 
     - name: "Wait for host to boot up"
-      wait_for:
+      ansible.builtin.wait_for:
         host: "{{ ansible_host }}"
         search_regex: OpenSSH
         port: 22
@@ -63,8 +63,8 @@
     # Clean old packages from hosts
     - name: Remove un-used packages
       ansible.builtin.apt:
-        autoremove: yes
-      become: yes
+        autoremove: true
+      become: true
       register: output
 
     - name: Show package cleaning results

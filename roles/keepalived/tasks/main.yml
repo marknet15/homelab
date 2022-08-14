@@ -1,26 +1,26 @@
 ---
 - name: "Install keepalived and required packages"
-  apt:
+  ansible.builtin.apt:
     pkg:
       - raspberrypi-kernel-headers
       - keepalived
     state: present
-  become: yes
+  become: true
 
 - name: "Enable keepalived service"
-  service:
+  ansible.builtin.service:
     name: keepalived
     state: started
-    enabled: yes
-  become: yes
+    enabled: true
+  become: true
 
 - name: "Template keepalived config"
-  template:
+  ansible.builtin.template:
     src: keepalived.conf.j2
     dest: /etc/keepalived/keepalived.conf
     owner: root
     group: root
     mode: 0640
-  become: yes
+  become: true
   notify:
     - reload keepalived
