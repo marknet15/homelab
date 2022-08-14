@@ -1,9 +1,34 @@
 ---
-- name: Add Docker Apt Key
-  ansible.builtin.apt_key:
-    url: https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg
-    state: present
+- name: Create keyrings directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
   become: true
+
+- name: Download Docker GPG key
+  ansible.builtin.get_url:
+    url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
+    dest: /tmp/docker.gpg
+    mode: "0440"
+
+# TODO: switch back to Ansible module when newer GPG keychain is supported
+- name: Add Docker Apt Key
+  ansible.builtin.command:
+    cmd: >
+      gpg
+      --dearmor --yes
+      -o /etc/apt/keyrings/docker.gpg
+      /tmp/docker.gpg
+  changed_when: false
+  become: true
+
+# - name: Add Docker Apt Key
+#   ansible.builtin.apt_key:
+#     url: https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg
+#     keyring: /etc/apt/trusted.gpg.d/
+#     state: present
+#   become: true
 
 - name: Enable Docker Apt Repo
   ansible.builtin.apt_repository:
@@ -12,12 +37,22 @@
     update_cache: true
   become: true
 
-# Install set version of Docker CE so that it can be controlled
+# TODO: figure out why docker-ce can't be found via Ansible apt module
+
+# - name: Install Docker CE
+#   ansible.builtin.apt:
+#     name: "docker-ce={{ docker_version }}"
+#     state: present
+#     update_cache: true
+#   become: true
+
 - name: Install Docker CE
-  ansible.builtin.apt:
-    name: "docker-ce={{ docker_version }}"
-    state: present
-  register: pkg_install
+  ansible.builtin.command:
+    cmd: >
+      apt install
+      docker-ce={{ docker_version }}
+      -y
+  changed_when: false
   become: true
 
 - name: Create docker group (for container mgmt)

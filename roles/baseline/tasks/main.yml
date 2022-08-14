@@ -26,9 +26,9 @@
     name:
       - apt-transport-https
       - ca-certificates
+      - lsb-release
       - curl
-      - python3
-      - python3-pip
+      - gnupg
       - htop
       - ncdu
       - vim
