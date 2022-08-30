@@ -29,4 +29,4 @@ jobs:
       - name: Run Ansible lint
         run: |
           export ANSIBLE_COLLECTIONS_PATH=/home/runner/.ansible/collections/ansible_collections
-          echo ansible-lint
+          ansible-lint -v
