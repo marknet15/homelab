@@ -25,12 +25,13 @@
         traefik.ingress.kubernetes.io/redirect-entry-point: https
       rules:
         - host: example.com
-          http:
-            paths:
-              - path: /
-                pathType: Exact
-                backend:
-                  serviceName: example-service
-                  servicePort: 80
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: example
+                  port:
+                    number: 80
   roles:
     - marknet15.homelab.k3s_deployment
