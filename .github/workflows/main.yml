@@ -14,7 +14,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
@@ -22,10 +21,12 @@ jobs:
           architecture: "x64"
 
       - name: Install Ansible lint
-        run: pip install ansible-core==2.13.2 ansible-lint==6.4.0
+        run: pip install ansible-core==2.13.3 ansible-lint==6.5.1
 
       - name: Install test requirements
         run: ansible-galaxy install -r test-requirements.yml
 
       - name: Run Ansible lint
-        run: export ANSIBLE_COLLECTIONS_PATH=/home/runner/.ansible/collections/ansible_collections && ansible-lint
+        run: |
+          export ANSIBLE_COLLECTIONS_PATH=/home/runner/.ansible/collections/ansible_collections
+          ansible-lint -v

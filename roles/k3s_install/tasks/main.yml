@@ -7,6 +7,14 @@
   when:
     - k3s_main_node | default(false) | bool
 
+- name: "Install python dependencies"
+  ansible.builtin.pip:
+    name:
+      - pyyaml
+      - kubernetes
+      - kubernetes-validate
+  become: true
+
 - name: "Set check fact"
   ansible.builtin.set_fact:
     k3s_installed: true
@@ -24,7 +32,7 @@
   include_tasks: worker-node.yml
   when:
     - not k3s_main_node | default(false) | bool
-    # - not k3s_installed
+    - not k3s_installed
 
 - name: "Remove temp token file"
   ansible.builtin.file:

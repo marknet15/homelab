@@ -20,34 +20,34 @@
     state: touch
   become: true
 
-- name: "Setup kube config"
-  block:
-    # Setup kube config for user
-    - name: "Create .kube directory"
-      ansible.builtin.file:
-        path: "~/.kube"
-        state: directory
-        mode: 0660
+- name: "Create .kube directory"
+  ansible.builtin.file:
+    path: "~/.kube"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0760
 
-    - name: "Copy k3s kube config to ~/.kube"
-      ansible.builtin.copy:
-        src: "/etc/rancher/k3s/k3s.yaml"
-        dest: "/home/{{ ansible_user }}/.kube/config"
-        mode: 0660
-        remote_src: true
-        owner: "{{ ansible_user }}"
-      become: true
+- name: "Copy k3s kube config to ~/.kube"
+  ansible.builtin.copy:
+    src: "/etc/rancher/k3s/k3s.yaml"
+    dest: "/home/{{ ansible_user }}/.kube/config"
+    mode: 0760
+    remote_src: true
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  become: true
 
-    # Acquire node join token
-    - name: "Read k3s node join token from main"
-      ansible.builtin.slurp:
-        src: "/var/lib/rancher/k3s/server/node-token"
-      become: true
-      register: node_token_lookup
+# Acquire node join token
+- name: "Read k3s node join token from main"
+  ansible.builtin.slurp:
+    src: "/var/lib/rancher/k3s/server/node-token"
+  become: true
+  register: node_token_lookup
 
-    - name: "Temporarily save node join token to local file"
-      ansible.builtin.copy:
-        content: "{{ node_token_lookup.content | b64decode }}"
-        dest: "/tmp/node-token"
-        mode: 0660
-      delegate_to: localhost
+- name: "Temporarily save node join token to local file"
+  ansible.builtin.copy:
+    content: "{{ node_token_lookup.content | b64decode }}"
+    dest: "/tmp/node-token"
+    mode: 0660
+  delegate_to: localhost
