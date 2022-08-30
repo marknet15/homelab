@@ -5,7 +5,7 @@ metadata:
   name: {{ deployment.name }}
   namespace: {{ namespace }}
   labels:
-    app: {{ deployment.app }}
+    app: {{ deployment.name }}
 spec:
   replicas: {{ deployment.replicas }}
   strategy:
@@ -15,11 +15,11 @@ spec:
       maxUnavailable: 1
   selector:
     matchLabels:
-      app: {{ deployment.app }}
+      app: {{ deployment.name }}
   template:
     metadata:
       labels:
-        app: {{ deployment.app }}
+        app: {{ deployment.name }}
     spec:
       containers: {{ deployment.containers }}
 {% if deployment.volumes is defined %}

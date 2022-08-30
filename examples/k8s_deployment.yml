@@ -1,0 +1,36 @@
+---
+- hosts: all
+  vars:
+    namespace: example
+    deployments:
+      - name: example-deployment
+        app: example
+        replicas: 2
+        containers:
+          - name: nginx
+            image: nginx
+            ports:
+              - containerPort: 80
+    services:
+      - name: example-service
+        app: example
+        type: NodePort
+        ports:
+          - protocol: TCP
+            port: 80
+    ingress:
+      name: example-ingress
+      annotations:
+        kubernetes.io/ingress.class: "traefik"
+        traefik.ingress.kubernetes.io/redirect-entry-point: https
+      rules:
+        - host: example.com
+          http:
+            paths:
+              - path: /
+                pathType: Exact
+                backend:
+                  serviceName: example-service
+                  servicePort: 80
+  roles:
+    - marknet15.homelab.k3s_deployment

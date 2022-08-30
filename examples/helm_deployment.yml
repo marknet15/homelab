@@ -1,0 +1,31 @@
+---
+- hosts: all
+  vars:
+    namespace: portainer
+    create_record: true
+    chart:
+      name: portainer
+      path: portainer/portainer
+      repo:
+        name: portainer
+        url: https://portainer.github.io/k8s/
+    chart_values:
+      image:
+        repository: portainer/portainer-ce
+        tag: 2.14.2
+        pullPolicy: Always
+      serviceAccount:
+        annotations: {}
+        name: portainer-sa-clusteradmin
+      ingress:
+        enabled: true
+        ingressClassName: ""
+        annotations:
+          kubernetes.io/ingress.class: traefik
+        hosts:
+          - host: portainer.example.com
+            paths:
+              - path: "/"
+        tls: []
+  roles:
+    - marknet15.homelab.helm_deployment
