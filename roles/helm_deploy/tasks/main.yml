@@ -1,34 +1,36 @@
 ---
-- name: "Create kubernetes namespace"
+- name: Create kubernetes namespace
   kubernetes.core.k8s:
     definition: "{{ lookup('template', 'namespace.yaml.j2') | from_yaml }}"
     validate:
       fail_on_error: true
     state: present
 
-- name: "Template out values.yaml files"
-  ansible.builtin.template:
-    src: "values.yaml.j2"
+- name: Create Helm values.yaml file
+  ansible.builtin.copy:
+    content: "{{ chart_values | to_yaml }}"
     dest: "/tmp/{{ chart.name }}.yaml"
     mode: 0660
-
-- name: "Add helm repository"
-  kubernetes.core.helm_repository:
-    name: stable
-    repo_url: "{{ chart.repository }}"
   when:
-    - chart.helm_repository is defined
+    - chart_values is defined
 
-- name: "Deploy helm chart to the cluster"
+- name: Add helm repository
+  kubernetes.core.helm_repository:
+    name: "{{ chart.repo.name }}"
+    repo_url: "{{ chart.repo.url }}"
+  when:
+    - chart.repo is defined
+
+- name: Deploy helm chart to the cluster
   kubernetes.core.helm:
     name: "{{ chart.name }}"
-    chart_ref: "{{ chart.source.path }}"
+    chart_ref: "{{ chart.path }}"
     release_namespace: "{{ namespace }}"
     update_repo_cache: true
     values_files:
       - "/tmp/{{ chart.name }}.yaml"
 
-- name: "Register a DNS record with CloudFlare"
+- name: Register a DNS record with CloudFlare
   community.general.cloudflare_dns:
     zone: "{{ chart.dnsZone }}"
     type: CNAME
