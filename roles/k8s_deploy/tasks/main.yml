@@ -6,6 +6,18 @@
       fail_on_error: true
     state: present
 
+- name: "Create kubernetes configMap"
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'configmap.yaml.j2') | from_yaml }}"
+    validate:
+      fail_on_error: true
+    state: present
+  with_items: "{{ configMaps }}"
+  loop_control:
+    loop_var: configMap
+  when:
+    - configMaps is defined
+
 - name: "Create kubernetes deployment"
   kubernetes.core.k8s:
     definition: "{{ lookup('template', 'deployment.yaml.j2') | from_yaml }}"
@@ -32,11 +44,8 @@
     validate:
       fail_on_error: true
     state: present
-  with_items: "{{ ingress_configs }}"
-  loop_control:
-    loop_var: ingress
   when:
-    - ingress_configs is defined
+    - ingress is defined
 
 - name: "Register a DNS record with CloudFlare"
   community.general.cloudflare_dns:
@@ -47,9 +56,6 @@
     account_email: "{{ cloudflare_username }}"
     account_api_token: "{{ cloudflare_api_token }}"
     state: present
-  with_items: "{{ ingress_configs }}"
-  loop_control:
-    loop_var: ingress
   when:
-    - ingress_configs is defined
+    - ingress is defined
     - ingress.dnsEnabled | default(false) | bool

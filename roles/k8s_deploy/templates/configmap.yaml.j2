@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ configMap.name }}
+  namespace: {{ namespace }}
+data:
+  {{ configMap.config | to_yaml }}

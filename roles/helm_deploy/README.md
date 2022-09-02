@@ -23,37 +23,3 @@ Example playbook:
       ansible.builtin.include_role:
         name: marknet15.homelab.helm_deploy
 ```
-
-## Examples
-
-`portainer.yml`
-
-```yaml
----
-namespace: tools
-create_record: true
-chart:
-  name: portainer
-  path: portainer/portainer
-  repo:
-    name: portainer
-    url: https://portainer.github.io/k8s/
-chart_values:
-  image:
-    repository: portainer/portainer-ce
-    tag: 2.14.2
-    pullPolicy: Always
-  serviceAccount:
-    annotations: {}
-    name: portainer-sa-clusteradmin
-  ingress:
-    enabled: true
-    ingressClassName: ""
-    annotations:
-      kubernetes.io/ingress.class: traefik
-    hosts:
-      - host: portainer.marknet15.com
-        paths:
-          - path: "/"
-    tls: []
-```
