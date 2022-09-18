@@ -1,0 +1,15 @@
+---
+- name: Create volume directory
+  ansible.builtin.file:
+    path: "{{ compose.volume_path }}"
+    state: directory
+    mode: "0755"
+  become: true
+  when:
+    - compose.volume_path is defined
+
+- name: Install docker compose stack
+  community.docker.docker_compose:
+    project_name: "{{ compose.name }}"
+    definition: "{{ compose.definition }}"
+  register: output

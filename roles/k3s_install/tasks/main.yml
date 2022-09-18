@@ -28,6 +28,13 @@
     - k3s_main_node | default(false) | bool
     - not k3s_installed
 
+- name: "Setup Digital Ocean container registry secret"
+  include_tasks: setup-do-registry.yml
+  when:
+    - k3s_setup_do_registry | default(false) | bool
+    - k3s_main_node | default(false) | bool
+    - not k3s_installed
+
 - name: "Setup worker k3s node"
   include_tasks: worker-node.yml
   when:

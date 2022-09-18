@@ -1,0 +1,26 @@
+---
+- name: Get Digital Ocean registry secret manifest
+  ansible.builtin.command:
+    cmd: >
+      doctl registry kubernetes-manifest
+  register: registry_secret
+  delegate_to: localhost
+  changed_when: false
+
+- name: Set temp manifest definition fact
+  ansible.builtin.set_fact:
+    secret_definition: "{{ registry_secret.stdout | from_yaml }}"
+
+- name: Write secret manifest to file
+  ansible.builtin.copy:
+    content: "{{ secret_definition }}"
+    dest: /tmp/do-secret.yaml
+    mode: 0644
+  become: true
+
+- name: "Digital Ocean registry secret"
+  kubernetes.core.k8s:
+    src: /tmp/do-secret.yaml
+    validate:
+      fail_on_error: false
+    state: present
