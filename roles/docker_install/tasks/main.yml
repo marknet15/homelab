@@ -1,4 +1,11 @@
 ---
+- name: Install python dependencies
+  ansible.builtin.pip:
+    name:
+      - docker
+      - docker-compose
+  become: true
+
 - name: Create keyrings directory
   ansible.builtin.file:
     path: /etc/apt/keyrings
@@ -11,6 +18,7 @@
     url: "https://download.docker.com/linux/{{ ansible_distribution | lower }}/gpg"
     dest: /tmp/docker.gpg
     mode: "0440"
+  become: true
 
 # TODO: switch back to Ansible module when newer GPG keychain is supported
 - name: Add Docker Apt Key
@@ -63,7 +71,7 @@
 
 - name: Add Ansible user to Docker group
   ansible.builtin.user:
-    name: ansible
+    name: "{{ ansible_user }}"
     groups: docker
     append: true
   become: true
@@ -75,3 +83,10 @@
     state: started
   become: true
   notify: Test docker
+
+- name: Init Docker swarm when enabled
+  community.docker.docker_swarm:
+    state: present
+  register: swarm_init
+  when:
+    - docker_swarm_enabled | bool
