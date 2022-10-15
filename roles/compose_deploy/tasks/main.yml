@@ -13,3 +13,7 @@
     project_name: "{{ compose.name }}"
     definition: "{{ compose.definition }}"
   register: output
+
+- name: Print compose deploy result
+  ansible.builtin.debug:
+    var: output
